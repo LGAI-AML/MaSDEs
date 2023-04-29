@@ -176,5 +176,3 @@ def get_mse(truth, pred_y, mask=None):
     log_density_data = compute_mse(pred_y, truth, mask=mask)
     # shape: [1]
     return torch.mean(log_density_data)
-
-
