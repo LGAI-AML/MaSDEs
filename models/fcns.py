@@ -89,8 +89,6 @@ class temporal_privacy_fcns(nn.Module):
             self.layers.append(nn.Sequential(*self.block))
 
         self.dense_layers = []
-
-        print(nums)
         
         for i in range(self.args.T_p):
             d = nums[i]
@@ -103,11 +101,11 @@ class temporal_privacy_fcns(nn.Module):
     def forward(self, input, m, t, N, agent): 
         t_1 = torch.cos(t / self.args.T)
         t_2 = torch.sin(t / self.args.T)
-        t_3 = t / self.T
+        t_3 = t / self.args.T
         X = torch.cat((input, m, t_1, t_2, t_3), 1)
         X = self.bottleneck_front(X)
         
-        if self.args.adaptive == True:
+        if self.args.AdaIN == True:
             A_ = agent * torch.ones_like(X)
             X = self.AdaIN(X, A_, self.args.A)
             

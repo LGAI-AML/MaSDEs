@@ -18,9 +18,10 @@ parser.add_argument("-data_set", type=str, default="air_quality", help="[physion
 parser.add_argument("-n_stages", type=int, default=500, help="Number of stages")
 parser.add_argument("-random_seed", type=int, default=2022, help="Random_seed")
 parser.add_argument("-lr", type=float, default=1e-3, help="Learning rate")
-parser.add_argument("-batch_size", type=int, default=128, help="Batch size")
+parser.add_argument("-B", type=int, default=128, help="Batch size")
 parser.add_argument("-T_p", type=int, default=48, help="Number of Total time steps")
 parser.add_argument("-T_o", type=int, default=36, help="Observable Time interval [0, T_o)")
+parser.add_argument("-PI", type=int, default=12, help="Prediction Interval Length")
 parser.add_argument("-A", type=int, default=36, help="Number of players")
 parser.add_argument("-D", type=int, default=6, help="Number of data dimensions")
 parser.add_argument("-L", type=int, default=2, help="Number of Piecewise layers")
@@ -32,6 +33,7 @@ parser.add_argument("-hidden_dim", type=int, default=128, help="Dimension of Pie
 parser.add_argument("-hidden_weight", type=int, default=36, help="Dimension of Piecewise Aggregation layers")
 parser.add_argument("-sigma_high", type=float, default=5.0, help="Maximum volatility")
 parser.add_argument("-sigma_low",  type=float, default=0.1, help="Minumum volatility")
+parser.add_argument("-de_type",  type=str, default="ode", help="[ode, sde] liouville / euler maruyama")
 parser.add_argument("-sde_type",  type=str, default="vanilla", help="SDE Type")
 
 args = parser.parse_args()
@@ -55,13 +57,13 @@ def main():
     utils.makedirs(save_log_path)
     
     ckpt_path = os.path.join(save_ckpt_path, "experiment_" + str(args.ID) + ".ckpt")
+    args.ckpt_path = ckpt_path
     log_path = save_log_path + str(args.ID) + ".log"
 
     logger = utils.get_logger(logpath=log_path, filepath=os.path.abspath("__file__"))
     for o in vars(args):
         logger.info("{} : {}".format(o, getattr(args,o)))
     logger.info("Experiments" + str(experimentID))
-
 
     train_loader, test_loader = data_loader(args)
 

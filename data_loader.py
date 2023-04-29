@@ -11,13 +11,13 @@ def data_loader(args):
         test_dataset = air_quality(train=False)
         
     train_loader = data.DataLoader(dataset = train_dataset,
-                                   batch_size = args.batch_size,
+                                   batch_size = args.B,
                                    num_workers=0,
                                    drop_last=True,
                                    shuffle=True)
         
     test_loader = data.DataLoader(dataset = test_dataset,
-                                   batch_size = args.batch_size,
+                                   batch_size = args.B,
                                    num_workers=0,
                                    drop_last=True,
                                    shuffle=False)    
