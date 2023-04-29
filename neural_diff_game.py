@@ -85,10 +85,10 @@ class masdes(nn.Module):
 
     def score_function(self, X1, X0, b, sigma, dt):
         Sigma = sigma * sigma
-        InvSigma = torch.diag_embed(1 / torch.diagonal(Sigma, dim1=-2,dim2=-1))
+        invSigma = torch.diag_embed(1 / torch.diagonal(Sigma, dim1=-2,dim2=-1))
         
         score = -(1/dt) * torch.squeeze(
-            torch.matmul(InvSigma, (X1 - X0 - b*dt).unsqueeze(-1)), 
+            torch.matmul(invSigma, (X1 - X0 - b*dt).unsqueeze(-1)), 
             dim=-1)
         return score.detach()
         
@@ -178,8 +178,8 @@ class masdes(nn.Module):
             running_cost = self.running_cost(target_Y, prediction.transpose(1, 0), target_mask)
             terminal_cost = self.terminal_cost(decision_A, weight_A)
             
-            loss_train += (running_cost + terminal_cost).item()  
-            loss += (running_cost + terminal_cost) + selfish_cost
+            loss_train += (running_cost + terminal_cost + selfish_cost).item()  
+            loss += running_cost + terminal_cost + selfish_cost
             
         self.optimizer.zero_grad()
         loss.backward()
