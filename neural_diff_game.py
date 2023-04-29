@@ -156,7 +156,6 @@ class masdes(nn.Module):
             
             loss_train += (running_cost + terminal_cost + selfish_cost).item()  
             loss += running_cost + terminal_cost + selfish_cost
-            
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
