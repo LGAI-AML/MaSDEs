@@ -36,7 +36,7 @@ python main.py -gpu_num 0 -dataset "cifar100" -network 2
  - ResNet110 SD
 ```
 python main.py -gpu_num 0 -dataset "cifar100" -network 3 -lamda 0.01
-
+```
 ### ImageNet
  - DenseNet162
 ```
@@ -45,6 +45,4 @@ python main.py -gpu_num 0 -dataset "imagenet" -network 0 -initial 3
  - ResNet152
 ```
 python main.py -gpu_num 0 -dataset "imagenet" -network 1 -initial 3
-```
-
 ```
