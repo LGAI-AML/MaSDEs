@@ -9,7 +9,7 @@ import utils as utils
 from data_loader import data_loader
 from neural_diff_game import masdes
 
-parser = argparse.ArgumentParser("Cooperative Differential Game for Time-Series")
+parser = argparse.ArgumentParser("Neural Stochastic Differential Game for Time-Series Analysis")
 parser.add_argument("-gpu_num",        type=int,   default=0,             help="Number of GPU to use.")
 parser.add_argument("-model_load",     type=bool,  default=False,         help="Import Pretrained Model")
 parser.add_argument("-data_set",       type=str,   default="air_quality", help="Dataset specification : [physionet, speech, air_quality]")
@@ -31,9 +31,10 @@ parser.add_argument("-hidden_weight",  type=int,   default=36,            help="
 parser.add_argument("-sigma_high",     type=float, default=5.0,           help="Maximum volatility")
 parser.add_argument("-sigma_low",      type=float, default=0.1,           help="Minumum volatility")
 parser.add_argument("-de_type",        type=str,   default="ode",         help="[ode, sde] liouville / euler maruyama")
-parser.add_argument("-sde_drift_type", type=str,   default="vanilla",     help="[vanila, mckean_vlasov]")
+parser.add_argument("-sde_drift",      type=str,   default="vanilla",     help="[vanila, mckean_vlasov]")
+parser.add_argument("-sde_diffusion",  type=str,   default="constant",    help="[constant, nn]")
 parser.add_argument("-cooperation",    type=bool,  default=True,          help="If to be cooperative action")
-parser.add_argument("-non_coop_agent", type=list,  default=[0],           help="Indentifying Non-cooperative agent")
+parser.add_argument("-non_coop_agent", type=list,  default=[0, 15],           help="Indentifying Non-cooperative agent")
 
 
 args = parser.parse_args()
