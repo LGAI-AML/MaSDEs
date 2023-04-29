@@ -88,9 +88,8 @@ class masdes(nn.Module):
         InvSigma = torch.diag_embed(1 / torch.diagonal(Sigma, dim1=-2,dim2=-1))
         
         score = -(1/dt) * torch.squeeze(
-            torch.matmul(
-                InvSigma, (X1 - X0 - b*dt).unsqueeze(-1)),
-                dim=-1)
+            torch.matmul(InvSigma, (X1 - X0 - b*dt).unsqueeze(-1)), 
+            dim=-1)
         return score.detach()
         
     def sde_propagation(self, X, mask, player_index):
