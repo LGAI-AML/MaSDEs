@@ -22,7 +22,7 @@ class masdes(nn.Module):
     def fetch_minibatch(self):
         Dt = np.zeros((self.args.B, self.args.T_p, 1))  # B x N x 1
         DW = np.zeros((self.args.B, self.args.T_p, self.args.D))  # B x N x D
-        dt = self.args.T / (self.args.T_p - 1)
+        dt = 1 / (self.args.T_p - 1)
         Dt[:, 1:, :] = dt
         DW[:, 1:, :] = np.sqrt(dt) * np.random.normal(size=(self.args.B, self.args.T_p - 1, self.args.D))
 
@@ -47,13 +47,21 @@ class masdes(nn.Module):
     def terminal_cost(self, state_A, weight_A):  # B x 1
         # loss_terminal = weight_A.pow(2).mean()
         return 0.
+    
+    def selfish_cost(self, A, weight_A):
+        if self.args.cooperation is not True and any([A == agent for agent in self.args.non_coop_agent]):
+            loss_selfish = (weight_A[0, :, :, 0] - 1).pow(2).mean()
+            print('Agent:', A)
+            print('selfish cost:', loss_selfish)
+        else:
+            loss_selfish = 0.
+        return loss_selfish
 
     def drift(self, t, X, Z):  # B x 1, B x D, B x D
-        if self.args.sde_type == "mckean_vlasov":
+        if self.args.sde_drift_type == "mckean_vlasov":
             out = torch.mean(Z, dim=0).unsqueeze(0) - Z
-        elif self.args.sde_type == "vanilla":
+        elif self.args.sde_drift_type == "vanilla":
             out = Z
-
         return out  # B x 3 x D
 
     # Non-degenerate type diffusion function
@@ -82,9 +90,7 @@ class masdes(nn.Module):
         score = -(1/dt) * torch.squeeze(
             torch.matmul(
                 InvSigma, (X1 - X0 - b*dt).unsqueeze(-1)),
-                dim=-1
-            )
-        
+                dim=-1)
         return score.detach()
         
     def sde_propagation(self, X, mask, player_index):
@@ -113,7 +119,7 @@ class masdes(nn.Module):
             diffusion_ = self.diffusion(t0, X0, Y0)
 
             if self.args.de_type == "ode":
-                ## probabilistic flow ODE ##
+                ## probability flow ODE ##
                 drift_ode = self.liouville(X0, drift_, diffusion_, dt, dWt)
                 X1 = X0 + drift_ode * dt
             elif self.args.de_type == "sde":
@@ -133,9 +139,9 @@ class masdes(nn.Module):
 
         return X_list, W_list
     
-    def fictitious_play(self, t, W, Y, M, stage):
+    def fictitious_play(self, t, W, Y, M):
         target_Y = Y[:, self.args.T_o:, :]
-        mask = M[:, self.args.T_o:, :]
+        target_mask = M[:, self.args.T_o:, :]
         
         total_decision = torch.zeros(self.args.A, self.args.PI, self.args.B, self.args.D, requires_grad=True).cuda()
         total_weight = torch.zeros(self.args.A, self.args.PI, self.args.B, 1, requires_grad=True).cuda()
@@ -151,16 +157,16 @@ class masdes(nn.Module):
      
         ## Deep Neural Fictitious Play ##
         for A_ in tqdm(range(self.args.A), desc='Agent', mininterval=0.1):  
-            TD_dummy = total_decision.clone().detach() 
-            TW_dummy = total_weight.clone().detach()
+            decision_detached = total_decision.clone().detach() 
+            weight_detached = total_weight.clone().detach()
             
             Y_A = Y[:, A_, :]
-            decision_A, weight_A = self.predict(Y_A, M, A_) #""gradient on"
+            decision_A, weight_A = self.predict(Y_A, M, A_) # ""gradient on"
             
             decision_A, weight_A = decision_A.unsqueeze(0), weight_A.unsqueeze(0)
             with torch.no_grad():
-                decision_not_A = torch.cat([TD_dummy[:A_, :, :, :], TD_dummy[A_+1:, :, :]]) # "gradient off"
-                weight_not_A = torch.cat([TW_dummy[:A_, :, :, :], TW_dummy[A_+1:, :, :]]) # "gradient off"
+                decision_not_A = torch.cat([decision_detached[:A_, :, :, :], decision_detached[A_+1:, :, :]]) # "gradient off"
+                weight_not_A = torch.cat([weight_detached[:A_, :, :, :], weight_detached[A_+1:, :, :]]) # "gradient off"
             
             total_decision_A = torch.cat((decision_A, decision_not_A), dim=0)
             total_weight_A = torch.cat((weight_A, weight_not_A), dim=0)      
@@ -169,11 +175,12 @@ class masdes(nn.Module):
             
             prediction = (total_decision_A * total_weight_A).sum(0)
 
-            running_cost = self.running_cost(target_Y, prediction.transpose(0,1), mask)
+            selfish_cost = self.selfish_cost(A_, total_weight_A)
+            running_cost = self.running_cost(target_Y, prediction.transpose(1, 0), target_mask)
             terminal_cost = self.terminal_cost(decision_A, weight_A)
             
             loss_train += (running_cost + terminal_cost).item()  
-            loss += (running_cost + terminal_cost) 
+            loss += (running_cost + terminal_cost) + selfish_cost
             
         self.optimizer.zero_grad()
         loss.backward()
@@ -182,12 +189,12 @@ class masdes(nn.Module):
         loss_train /= (self.args.A)
         return loss_train
    
-    def train(self, train_loader, stage):
+    def train(self, train_loader):
         avg_train_loss = 0.
         for i, (data, mask) in enumerate(train_loader):
             train_data, train_mask = data.to(self.device), mask.to(self.device)
             t_batch ,W_batch = self.fetch_minibatch()
-            train_loss = self.fictitious_play(t_batch, W_batch, train_data, train_mask, stage)        
+            train_loss = self.fictitious_play(t_batch, W_batch, train_data, train_mask)        
             msg = ("Iter = [%d/%d], Train_Loss: : %.4f" % (i+1, len(train_loader), 100*train_loss))
             self.logger.info(msg)    
             avg_train_loss += train_loss
@@ -227,11 +234,12 @@ class masdes(nn.Module):
             return 100 * mse_test.item(), 100 * nll_test.item()
         
     def train_and_eval(self, train_loader, test_loader):
+        start_stage = 0
         mse_best = 1e5
         nll_best = -1e5
         
-        for stage in range(self.args.n_stages):
-            losses_train = self.train(train_loader, stage)
+        for stage in range(start_stage, self.args.n_stages):
+            losses_train = self.train(train_loader)
             mse_test, nll_test = self.evaluation(test_loader)
 
             if mse_test < mse_best:

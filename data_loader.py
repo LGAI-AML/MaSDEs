@@ -5,7 +5,6 @@ import numpy as np
 
 
 def data_loader(args):
-    #### Will be changed into "Synthetic"
     if args.data_set == "air_quality":
         train_dataset = air_quality(train=True)
         test_dataset = air_quality(train=False)

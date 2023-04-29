@@ -9,32 +9,32 @@ import utils as utils
 from data_loader import data_loader
 from cooperative_diff_game import masdes
 
-
 parser = argparse.ArgumentParser("Cooperative Differential Game for Time-Series")
-parser.add_argument("-gpu_num", type=int, default=0, help="Number of GPU to use.")
-parser.add_argument("-load", type=str, default=None, help="ID of the experiment to load for evaluation. If None, run a new experiment.")
-parser.add_argument("-model_load", default=False, help="Import Pretrained Model")
-parser.add_argument("-data_set", type=str, default="air_quality", help="[physionet,speech,air_quality]")
-parser.add_argument("-n_stages", type=int, default=500, help="Number of stages")
-parser.add_argument("-random_seed", type=int, default=2022, help="Random_seed")
-parser.add_argument("-lr", type=float, default=1e-3, help="Learning rate")
-parser.add_argument("-B", type=int, default=128, help="Batch size")
-parser.add_argument("-T_p", type=int, default=48, help="Number of Total time steps")
-parser.add_argument("-T_o", type=int, default=36, help="Observable Time interval [0, T_o)")
-parser.add_argument("-PI", type=int, default=12, help="Prediction Interval Length")
-parser.add_argument("-A", type=int, default=36, help="Number of players")
-parser.add_argument("-D", type=int, default=6, help="Number of data dimensions")
-parser.add_argument("-L", type=int, default=2, help="Number of Piecewise layers")
-parser.add_argument("-T", type=float, default=1.0, help="Total time interval")
-parser.add_argument('-c_gap', type=int, default=1, help='Time gap between Piecewise layers')
-parser.add_argument('-r_gap', type=int, default=3, help='Manage Area for each Piecewise layers')
-parser.add_argument('-AdaIN', default=False, help='On-Off AdaIN')
-parser.add_argument("-hidden_dim", type=int, default=128, help="Dimension of Piecewise FCN layers")
-parser.add_argument("-hidden_weight", type=int, default=36, help="Dimension of Piecewise Aggregation layers")
-parser.add_argument("-sigma_high", type=float, default=5.0, help="Maximum volatility")
-parser.add_argument("-sigma_low",  type=float, default=0.1, help="Minumum volatility")
-parser.add_argument("-de_type",  type=str, default="ode", help="[ode, sde] liouville / euler maruyama")
-parser.add_argument("-sde_type",  type=str, default="vanilla", help="SDE Type")
+parser.add_argument("-gpu_num",        type=int,   default=0,             help="Number of GPU to use.")
+parser.add_argument("-model_load",     type=bool,  default=False,         help="Import Pretrained Model")
+parser.add_argument("-data_set",       type=str,   default="air_quality", help="Dataset specification : [physionet, speech, air_quality]")
+parser.add_argument("-n_stages",       type=int,   default=500,           help="Number of stages")
+parser.add_argument("-random_seed",    type=int,   default=2022,          help="Random_seed")
+parser.add_argument("-lr",             type=float, default=1e-3,          help="Learning rate")
+parser.add_argument("-B",              type=int,   default=128,           help="Batch size")
+parser.add_argument("-T_p",            type=int,   default=48,            help="Number of Total time steps")
+parser.add_argument("-T_o",            type=int,   default=36,            help="Observable Time interval [0, T_o)")
+parser.add_argument("-PI",             type=int,   default=12,            help="Prediction Interval Length")
+parser.add_argument("-A",              type=int,   default=36,            help="Number of players")
+parser.add_argument("-D",              type=int,   default=6,             help="Number of data dimensions")
+parser.add_argument("-L",              type=int,   default=2,             help="Number of Piecewise layers")
+parser.add_argument('-c_gap',          type=int,   default=1,             help='Time gap between Piecewise layers')
+parser.add_argument('-r_gap',          type=int,   default=3,             help='Manage Area for each Piecewise layers')
+parser.add_argument('-ail',            type=bool,  default=False,         help='If to use agent identification layer')
+parser.add_argument("-hidden_dim",     type=int,   default=128,           help="Dimension of Piecewise FCN layers")
+parser.add_argument("-hidden_weight",  type=int,   default=36,            help="Dimension of Piecewise Aggregation layers")
+parser.add_argument("-sigma_high",     type=float, default=5.0,           help="Maximum volatility")
+parser.add_argument("-sigma_low",      type=float, default=0.1,           help="Minumum volatility")
+parser.add_argument("-de_type",        type=str,   default="ode",         help="[ode, sde] liouville / euler maruyama")
+parser.add_argument("-sde_drift_type", type=str,   default="vanilla",     help="[vanila, mckean_vlasov]")
+parser.add_argument("-cooperation",    type=bool,  default=True,          help="If to be cooperative action")
+parser.add_argument("-non_coop_agent", type=list,  default=[0],           help="Indentifying Non-cooperative agent")
+
 
 args = parser.parse_args()
 
@@ -72,6 +72,5 @@ def main():
     
     model.train_and_eval(train_loader, test_loader)
     
-
 if __name__ == "__main__":
     main()  

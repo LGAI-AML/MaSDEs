@@ -38,7 +38,7 @@ class LipSwish(torch.nn.Module):
     def forward(self, x):
         return 0.909 * torch.nn.functional.silu(x)
     
-class AdaIN(torch.nn.Module):
+class AIL(torch.nn.Module):
     def forward(self, X, Agent, I, eps = 1e-5):
         # X , Agent : B x Dim , B x Dim
         assert (X.size() == Agent.size())
@@ -71,7 +71,7 @@ class temporal_privacy_fcns(nn.Module):
             nn.Linear(self.args.hidden_weight, 1),
         )        
         
-        self.AdaIN = AdaIN()       
+        self.AdaIN = AIL()       
         self.activation = LipSwish()
         self.softmax = nn.Softmax()
         
@@ -99,13 +99,13 @@ class temporal_privacy_fcns(nn.Module):
         self.all_layers = nn.Sequential(*self.dense_layers)
 
     def forward(self, input, m, t, N, agent): 
-        t_1 = torch.cos(t / self.args.T)
-        t_2 = torch.sin(t / self.args.T)
-        t_3 = t / self.args.T
+        t_1 = torch.cos(t)
+        t_2 = torch.sin(t)
+        t_3 = t
         X = torch.cat((input, m, t_1, t_2, t_3), 1)
         X = self.bottleneck_front(X)
         
-        if self.args.AdaIN == True:
+        if self.args.ail == True:
             A_ = agent * torch.ones_like(X)
             X = self.AdaIN(X, A_, self.args.A)
             
