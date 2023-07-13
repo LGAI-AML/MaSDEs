@@ -40,13 +40,3 @@ python main.py -data_set physionet -T_p 48 -T_o 36 -PI 12 -D 36 -ail
 ```
 python main.py -data_set speech -T_p 54 -T_o 43 -PI 11 -D 65 -ail
 ```
-## Citation
-If you find our code helpful for your research, please consider citing us:
-```bibtex
-@inproceedings{park2023neural,
-    title={Neural Stochastic Differential Games for Time-series Analysis}, 
-    author={Park, Sungwoo and Park, Byoungwoo and Lee, Moontae and Lee, Changhee},
-    year={2023},
-    booktitle={Proceedings of the 40th International Conference on Machine Learning (ICML)}
-}
-```
