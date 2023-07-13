@@ -1,6 +1,6 @@
 ## Neural Stochastic Differential Games for Time-series Analysis
 
-The PyTorch implementation for the paper titled "[Neural Stochastic Differential Games for Time-series Analysis]([https://proceedings.mlr.press/v202/park23j.html])" by [Sungwoo Park](https://scholar.google.co.kr/citations?user=B1xpjO8AAAAJ&hl=en), [Byoungwoo Park](https://scholar.google.co.kr/citations?user=MWCPYLMAAAAJ&hl=en), [Moontae Lee](https://scholar.google.com/citations?user=BMvYy9cAAAAJ&hl=en) and [Changhee Lee](https://scholar.google.com/citations?user=kSvJTg4AAAAJ&hl=en) published at ICML 2023. 
+The PyTorch implementation for the paper titled "[Neural Stochastic Differential Games for Time-series Analysis](https://proceedings.mlr.press/v202/park23j.html)" by [Sungwoo Park](https://scholar.google.co.kr/citations?user=B1xpjO8AAAAJ&hl=en), [Byoungwoo Park](https://scholar.google.co.kr/citations?user=MWCPYLMAAAAJ&hl=en), [Moontae Lee](https://scholar.google.com/citations?user=BMvYy9cAAAAJ&hl=en) and [Changhee Lee](https://scholar.google.com/citations?user=kSvJTg4AAAAJ&hl=en) published at ICML 2023. 
 
 >Park, S., Park, B., Lee, M., & Lee, C. (2023). Neural Stochastic Differential Games for Time-series Analysis. In International Conference on Machine Learning. PMLR.
 
